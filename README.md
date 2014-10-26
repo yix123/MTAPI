@@ -13,7 +13,7 @@ Most calls return one or more `station` objects, which look like this:
 ```javascript
 {
     "realtime": {
-        N": [
+        "N": [
             {
                 "route": "6",
                 "time": "2014-08-29T14:00:55-04:00"
