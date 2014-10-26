@@ -9,7 +9,7 @@
     :license: BSD, see LICENSE for more details.
 """
 
-import mta_realtime
+import mtapi
 from flask import Flask, request, jsonify, render_template, abort
 from flask.json import JSONEncoder
 from datetime import datetime
@@ -32,7 +32,6 @@ if app.debug:
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
 class CustomJSONEncoder(JSONEncoder):
-
     def default(self, obj):
         try:
             if isinstance(obj, datetime):
@@ -45,9 +44,10 @@ class CustomJSONEncoder(JSONEncoder):
         return JSONEncoder.default(self, obj)
 app.json_encoder = CustomJSONEncoder
 
-mta = mta_realtime.MtaSanitizer(
+mta = mtapi.MtApi(
     app.config['MTA_KEY'],
     app.config['STATIONS_FILE'],
+    app.config['STOP_TIMES_FILE'],
     max_trains=app.config['MAX_TRAINS'],
     max_minutes=app.config['MAX_MINUTES'],
     expires_seconds=app.config['CACHE_SECONDS'],
@@ -89,7 +89,7 @@ def by_location():
         return response
 
     return jsonify({
-        'updated': mta.last_update(),
+        'updated': mta.last_update,
         'data': mta.get_by_point(location, 5)
         })
 
@@ -98,7 +98,7 @@ def by_location():
 def by_route(route):
     try:
         return jsonify({
-            'updated': mta.last_update(),
+            'updated': mta.last_update,
             'data': mta.get_by_route(route)
             })
     except KeyError as e:
@@ -110,7 +110,7 @@ def by_index(id_string):
     ids = [ int(i) for i in id_string.split(',') ]
     try:
         return jsonify({
-            'updated': mta.last_update(),
+            'updated': mta.last_update,
             'data': mta.get_by_id(ids)
             })
     except KeyError as e:
@@ -120,7 +120,7 @@ def by_index(id_string):
 @cross_origin
 def routes():
     return jsonify({
-        'updated': mta.last_update(),
+        'updated': mta.last_update,
         'data': mta.get_routes()
         })
 
