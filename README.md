@@ -35,11 +35,15 @@ Most calls return one or more `station` objects, which look like this:
             },
             ...
         ],
+        "routes": [
+            "6",
+        ]
     },
     "schedule_estimates": {
         "B": 1200,      // estimate of train frequency, in seconds
         "D": 1140,      // estimates based on MTA timetables
-        "F": 570
+        "F": 570,
+        "6": 600
     }
     "id": 123,
     "location": [

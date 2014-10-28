@@ -181,10 +181,7 @@ class MtApi(object):
         self._update_lock_time = datetime.datetime.now()
         self._logger.info('updating...')
 
-        realtime_data = defaultdict(lambda: {
-                'N': [],
-                'S': []
-            })
+        realtime_data = {}
 
         feed_urls = [
             'http://datamine.mta.info/mta_esi.php?feed_id=1&key='+self._KEY,
@@ -222,9 +219,17 @@ class MtApi(object):
                             route_id = 'S'
 
                         stop_id = str(update.stop_id[:3])
-                        direction = update.stop_id[3]
 
-                        realtime_data[stop_id][direction].append({
+                        stop = realtime_data.setdefault(stop_id, {
+                                'N': [],
+                                'S': [],
+                                'routes': set()
+                            })
+
+                        stop['routes'].add(route_id)
+
+                        direction = update.stop_id[3]
+                        stop[direction].append({
                             'route': route_id,
                             'time': time
                         })
@@ -242,12 +247,17 @@ class MtApi(object):
                     if freq:
                         station['schedule_estimates'][route_id] = freq
 
-            station['realtime'] = {}
+            station['realtime'] = {
+                    'N': [],
+                    'S': [],
+                    'routes': set()
+                }
             for direction in ['N', 'S']:
                 trains = []
                 for stop_id in station['stops']:
                     if stop_id in realtime_data:
                         trains.extend(realtime_data[stop_id][direction])
+                        station['realtime']['routes'].update(realtime_data[stop_id]['routes'])
 
                 if trains:
                     station['realtime'][direction] = sorted(trains, key=itemgetter('time'))[:self._MAX_TRAINS]
